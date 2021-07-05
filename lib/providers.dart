@@ -2,6 +2,7 @@ import 'package:calculator_application/database.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import './database.dart';
 import 'package:state_notifier/state_notifier.dart';
+import 'package:math_expressions/math_expressions.dart';
 
 //user state for the app
 
@@ -9,24 +10,52 @@ final userProvider = FutureProvider<String>((ref) async {
   return ref.read(databaseProvider).getUserData();
 });
 
-// counter state notifier for the app
-final counterController =
-    StateNotifierProvider<CounterNotifier, int>((ref) => CounterNotifier());
+// total state notifier for the app
+final totalController =
+    StateNotifierProvider<TotalNotifier, String>((ref) => TotalNotifier());
 
-class CounterNotifier extends StateNotifier<int> {
-  CounterNotifier() : super(0);
+class TotalNotifier extends StateNotifier<String> {
+  TotalNotifier() : super("");
 
-  void add() {
-    state = state + 1;
+  void evaluate(String input) {
+    String finaluserinput = input.replaceAll('x', '*');
+    Parser p = Parser();
+    Expression exp = p.parse(finaluserinput);
+    ContextModel cm = ContextModel();
+    double eval = exp.evaluate(EvaluationType.REAL, cm);
+    state = eval.toString();
   }
 
-  void subtract() {
-    state = state - 1;
+  void clear() {
+    state = "";
+  }
+}
+
+final userInputController = StateNotifierProvider<UserInputNotifier, String>(
+    (ref) => UserInputNotifier());
+
+class UserInputNotifier extends StateNotifier<String> {
+  UserInputNotifier() : super("");
+
+   String get() {
+    return state;
+  }
+
+  void add(String value) {
+    state = state + value;
+  }
+
+  void del() {
+    state = state.substring(0, state.length - 1);
+  }
+
+  void clear() {
+    state = "";
   }
 }
 
 // async state notifier provider for state that doesn't change in real time
-final counterAsyncController =
+/*final counterAsyncController =
     StateNotifierProvider<CounterAsyncNotifier, AsyncValue<int>>(
         (ref) => CounterAsyncNotifier(ref.read));
 
@@ -54,4 +83,4 @@ class CounterAsyncNotifier extends StateNotifier<AsyncValue<int>> {
     int count = await read(databaseProvider).decrement();
     state = AsyncData(count);
   }
-}
+}*/

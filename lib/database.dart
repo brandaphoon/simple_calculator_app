@@ -10,7 +10,7 @@ class Database {
     });
   }
 
-  int fakeDatabase;
+  /*int fakeDatabase;
 
   Future<void> initDatabase() async {
     fakeDatabase = 0;
@@ -26,5 +26,5 @@ class Database {
     return Future.delayed(Duration(seconds: 3), () {
       return fakeDatabase = fakeDatabase - 1;
     });
-  }
+  }*/
 }

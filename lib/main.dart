@@ -1,91 +1,205 @@
+import 'package:calculator_application/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:calculator_application/providers.dart';
-
+import './widgets/button.dart';
 void main() {
   runApp(ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Home(),
-    );
+      debugShowCheckedModeBanner: false,
+      home: HomePage(),
+    ); // MaterialApp
   }
 }
 
-class Home extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  // Array of button
+  final List<String> buttons = [
+    'C',
+    '+/-',
+    '%',
+    'DEL',
+    '7',
+    '8',
+    '9',
+    '/',
+    '4',
+    '5',
+    '6',
+    'x',
+    '1',
+    '2',
+    '3',
+    '-',
+    '0',
+    '.',
+    '=',
+    '+',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Riverpod Simplified")),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Consumer(
-              builder: (BuildContext context,
-                  T Function<T>(ProviderBase<Object, T>) watch, Widget child) {
-                return watch(userProvider).when(data: (String value) {
-                  //"When" includes the whole object accounting for error, "maybeWhen" is only orElse and "map" is just the data itself
-                  return Text(value);
-                }, error: (Object error, StackTrace stackTrace) {
-                  return Text("Error");
-                }, loading: () {
-                  return CircularProgressIndicator();
-                });
-              },
-            ),
-            SizedBox(
-              height: 100,
-            ),
-            Consumer(
-              builder: (BuildContext context,
-                  T Function<T>(ProviderBase<Object, T>) watch, Widget child) {
-                return Text("Basic: " + watch(counterController).toString());
-              },
-            ),
-            SizedBox(
-              height: 100,
-            ),
-            Consumer(
-              builder: (BuildContext context,
-                  T Function<T>(ProviderBase<Object, T>) watch, Widget child) {
-                return watch(counterAsyncController).when(
-                  data: (int value) {
-                    return Text("AsyncValue: " + value.toString());
-                  },
-                  error: (Object error, StackTrace stackTrace) {
-                    return Text("error");
-                  },
-                  loading: () {
-                    return CircularProgressIndicator();
-                  },
-                );
-              },
-            ),
-            SizedBox(
-              height: 100,
-            ),
-            ElevatedButton(
-              child: Text("Add"),
-              onPressed: () {
-                context.read(counterController.notifier).add();
-                context.read(counterAsyncController.notifier).add();
-              },
-            ),
-            ElevatedButton(
-              child: Text("Subtract"),
-              onPressed: () {
-                context.read(counterController.notifier).subtract();
-                context.read(counterAsyncController.notifier).subtract();
-              },
-            )
-          ],
+      appBar: new AppBar(
+        title: Consumer(
+          builder: (BuildContext context,
+              T Function<T>(ProviderBase<Object, T>) watch, Widget child) {
+            return watch(userProvider).maybeWhen(data: (String value) {
+              //"When" includes the whole object accounting for error, 
+              //"maybeWhen" is only orElse and "map" is just the data itself
+              return Text("Let's Calculate, " + value + "!");
+            }, orElse: () {
+              return Text("Let's Calculate");
+            });
+          },
         ),
+      ), //AppBar
+      backgroundColor: Colors.white38,
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: Container(
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Container(
+                      padding: EdgeInsets.all(20),
+                      alignment: Alignment.centerRight,
+                      child: Consumer(
+                        builder: (BuildContext context,
+                            T Function<T>(ProviderBase<Object, T>) watch,
+                            Widget child) {
+                          return Text(watch(userInputController),
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.white));
+                        },
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(15),
+                      alignment: Alignment.centerRight,
+                      child: Consumer(
+                        builder: (BuildContext context,
+                            T Function<T>(ProviderBase<Object, T>) watch,
+                            Widget child) {
+                          return Text(
+                            watch(totalController),
+                            style: TextStyle(
+                                fontSize: 25,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          );
+                        },
+                      ),
+                    )
+                  ]),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Container(
+              child: GridView.builder(
+                  itemCount: buttons.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4),
+                  itemBuilder: (BuildContext context, int index) {
+                    // Clear Button
+                    if (index == 0) {
+                      return MyButton(
+                        buttontapped: () {
+                          context.read(totalController.notifier).clear();
+                          context.read(userInputController.notifier).clear();
+                        },
+                        buttonText: buttons[index],
+                        color: Colors.blue[50],
+                        textColor: Colors.black,
+                      );
+                    }
+
+                    // +/- button
+                    else if (index == 1) {
+                      return MyButton(
+                        buttonText: buttons[index],
+                        color: Colors.blue[50],
+                        textColor: Colors.black,
+                      );
+                    }
+                    // % Button
+                    else if (index == 2) {
+                      return MyButton(
+                        buttontapped: () {
+                          context
+                              .read(userInputController.notifier)
+                              .add(buttons[index]);
+                        },
+                        buttonText: buttons[index],
+                        color: Colors.blue[50],
+                        textColor: Colors.black,
+                      );
+                    }
+                    // Delete Button
+                    else if (index == 3) {
+                      return MyButton(
+                        buttontapped: () {
+                          context.read(userInputController.notifier).del();
+                        },
+                        buttonText: buttons[index],
+                        color: Colors.blue[50],
+                        textColor: Colors.black,
+                      );
+                    }
+                    // Equal_to Button
+                    else if (index == 18) {
+                      return MyButton(
+                        buttontapped: () {
+                          String input =  context.read(userInputController.notifier).get();
+                          context
+                              .read(totalController.notifier)
+                              .evaluate(input);
+                        },
+                        buttonText: buttons[index],
+                        color: Colors.orange[700],
+                        textColor: Colors.white,
+                      );
+                    }
+                    //  other buttons
+                    else {
+                      return MyButton(
+                        buttontapped: () {
+                          context
+                              .read(userInputController.notifier)
+                              .add(buttons[index]);
+                        },
+                        buttonText: buttons[index],
+                        color: isOperator(buttons[index])
+                            ? Colors.blueAccent
+                            : Colors.white,
+                        textColor: isOperator(buttons[index])
+                            ? Colors.white
+                            : Colors.black,
+                      );
+                    }
+                  }), // GridView.builder
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  bool isOperator(String x) {
+    if (x == '/' || x == 'x' || x == '-' || x == '+' || x == '=') {
+      return true;
+    }
+    return false;
   }
 }
