@@ -6,7 +6,7 @@ import 'package:math_expressions/math_expressions.dart';
 
 //user state for the app
 
-final userProvider = FutureProvider<String>((ref) async {
+final userProvider = FutureProvider.autoDispose<String>((ref) async {
   return ref.read(databaseProvider).getUserData();
 });
 
@@ -31,7 +31,7 @@ class TotalNotifier extends StateNotifier<String> {
   }
 }
 
-final userInputController = StateNotifierProvider<UserInputNotifier, String>(
+final userInputController = StateNotifierProvider.autoDispose<UserInputNotifier, String>(
     (ref) => UserInputNotifier());
 
 class UserInputNotifier extends StateNotifier<String> {
